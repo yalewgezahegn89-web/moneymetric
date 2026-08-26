@@ -11,20 +11,10 @@ import {
 } from "recharts";
 import type { LoanResult } from "@/calculators/engine/types";
 import { formatCurrency } from "@/lib/formatting";
+import { getTickInterval } from "@/lib/chart";
 
 interface LoanAmortizationChartProps {
   result: LoanResult;
-}
-
-function getTickInterval(loanTermYears: number): number {
-  if (loanTermYears <= 1) return 0.25;
-  if (loanTermYears <= 3) return 0.5;
-  if (loanTermYears <= 5) return 1;
-  if (loanTermYears <= 10) return 2;
-  if (loanTermYears <= 20) return 5;
-  if (loanTermYears <= 30) return 5;
-  if (loanTermYears <= 50) return 10;
-  return 10;
 }
 
 function CustomTooltip({

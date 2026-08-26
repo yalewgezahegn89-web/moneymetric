@@ -12,23 +12,13 @@ import {
 } from "recharts";
 import type { TimelinePoint } from "@/calculators/engine/types";
 import { formatCurrency } from "@/lib/formatting";
+import { getTickInterval } from "@/lib/chart";
 
 interface GrowthChartProps {
   timeline: TimelinePoint[];
   futureValue: number;
   totalContributions: number;
   totalInterest: number;
-}
-
-function getTickInterval(years: number): number {
-  if (years <= 1) return 0.25;
-  if (years <= 3) return 0.5;
-  if (years <= 5) return 1;
-  if (years <= 10) return 2;
-  if (years <= 20) return 5;
-  if (years <= 30) return 5;
-  if (years <= 50) return 10;
-  return 10;
 }
 
 function CustomTooltip({
