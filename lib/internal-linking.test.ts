@@ -233,7 +233,7 @@ describe("Breadcrumbs resolve correctly", () => {
     const schema = generateBreadcrumbSchema(breadcrumbItems);
 
     for (const item of schema.itemListElement) {
-      expect(item.item).toMatch(/^https:\/\/moneymetric\.com\//);
+      expect(item.item).toMatch(/^https:\/\/mymoneymetric\.com\//);
     }
   });
 });
