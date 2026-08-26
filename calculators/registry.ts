@@ -1,8 +1,10 @@
 import type { Calculator, CalculatorResult } from "./types";
 import type { CompoundInterestInput } from "./engine/types";
 import type { MortgageInput } from "./engine/types";
+import type { LoanInput } from "./engine/types";
 import { calculateCompoundInterest } from "./engine/compound-interest";
 import { calculateMortgage } from "./engine/mortgage";
+import { calculateLoan } from "./engine/loan";
 
 const compoundInterestCalculator: Calculator = {
   meta: {
@@ -254,7 +256,120 @@ const mortgageCalculator: Calculator = {
   },
 };
 
-export const calculatorRegistry: Calculator[] = [compoundInterestCalculator, mortgageCalculator];
+const loanCalculator: Calculator = {
+  meta: {
+    title: "Loan Calculator",
+    description:
+      "Calculate loan payments, total interest, and view an amortization schedule for any amortizing loan.",
+    slug: "loan",
+    category: "Loans",
+    keywords: [
+      "loan calculator",
+      "loan payment calculator",
+      "amortization calculator",
+      "loan interest calculator",
+      "personal loan calculator",
+    ],
+  },
+  inputs: [
+    {
+      name: "loanAmount",
+      label: "Loan Amount",
+      type: "number",
+      placeholder: "20000",
+      min: 0,
+      step: 1000,
+      required: true,
+      defaultValue: 20000,
+    },
+    {
+      name: "annualInterestRate",
+      label: "Annual Interest Rate",
+      type: "number",
+      placeholder: "8",
+      min: 0,
+      max: 100,
+      step: 0.1,
+      required: true,
+      defaultValue: 8,
+    },
+    {
+      name: "loanTermYears",
+      label: "Loan Term (Years)",
+      type: "number",
+      placeholder: "5",
+      min: 0.01,
+      step: 1,
+      required: true,
+      defaultValue: 5,
+    },
+    {
+      name: "paymentFrequency",
+      label: "Payment Frequency",
+      type: "select",
+      required: true,
+      defaultValue: "monthly",
+      options: [
+        { label: "Monthly", value: "monthly" },
+        { label: "Biweekly", value: "biweekly" },
+        { label: "Weekly", value: "weekly" },
+      ],
+    },
+  ],
+  supportedCountries: ["US", "CA", "GB", "AU"],
+  calculate: (inputs: Record<string, number | string | boolean>): CalculatorResult[] => {
+    const engineInput: LoanInput = {
+      loanAmount: Number(inputs.loanAmount),
+      annualInterestRate: Number(inputs.annualInterestRate),
+      loanTermYears: Number(inputs.loanTermYears),
+      paymentFrequency: inputs.paymentFrequency as LoanInput["paymentFrequency"],
+    };
+
+    const result = calculateLoan(engineInput);
+
+    const frequencyLabel: Record<string, string> = {
+      monthly: "month",
+      biweekly: "biweekly period",
+      weekly: "week",
+    };
+    const periodLabel = frequencyLabel[result.paymentFrequency] ?? "month";
+
+    return [
+      {
+        label: `Estimated Payment`,
+        value: result.regularPayment,
+        field: {
+          name: "regularPayment",
+          label: `Payment per ${periodLabel}`,
+          type: "currency",
+          suffix: ` / ${periodLabel}`,
+        },
+      },
+      {
+        label: "Loan Amount",
+        value: result.loanAmount,
+        field: { name: "loanAmount", label: "Loan Amount", type: "currency" },
+      },
+      {
+        label: "Total Payments",
+        value: result.totalPayments,
+        field: { name: "totalPayments", label: "Total Payments", type: "currency" },
+      },
+      {
+        label: "Total Interest",
+        value: result.totalInterest,
+        field: { name: "totalInterest", label: "Total Interest", type: "currency" },
+      },
+      {
+        label: "Number of Payments",
+        value: result.numberOfPayments,
+        field: { name: "numberOfPayments", label: "Number of Payments", type: "number" },
+      },
+    ];
+  },
+};
+
+export const calculatorRegistry: Calculator[] = [compoundInterestCalculator, mortgageCalculator, loanCalculator];
 
 export function getCalculatorBySlug(slug: string): Calculator | undefined {
   return calculatorRegistry.find((c) => c.meta.slug === slug);

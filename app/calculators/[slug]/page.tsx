@@ -7,6 +7,7 @@ import { generateCalculatorMetadata, generateBreadcrumbSchema } from "@/lib/seo"
 import { Container } from "@/components/ui/Container";
 import { CompoundInterestCalculator } from "@/components/calculators/CompoundInterestCalculator";
 import { MortgageCalculator } from "@/components/calculators/MortgageCalculator";
+import { LoanCalculator } from "@/components/calculators/LoanCalculator";
 import { CalculatorSeoSections } from "@/components/calculators/CalculatorSeoContent";
 
 interface PageProps {
@@ -23,6 +24,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 const CALCULATOR_COMPONENTS: Record<string, React.ComponentType> = {
   "compound-interest": CompoundInterestCalculator,
   mortgage: MortgageCalculator,
+  loan: LoanCalculator,
 };
 
 export default async function CalculatorPage({ params }: PageProps) {

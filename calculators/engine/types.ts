@@ -103,3 +103,40 @@ export const PAYMENTS_PER_YEAR: Record<PaymentFrequency, number> = {
   biweekly: 26,
   weekly: 52,
 };
+
+// --- Loan Types ---
+
+export interface LoanInput {
+  loanAmount: number;
+  annualInterestRate: number;
+  loanTermYears: number;
+  paymentFrequency: PaymentFrequency;
+}
+
+export interface LoanValidationError {
+  field: string;
+  message: string;
+}
+
+export interface LoanTimelinePoint {
+  paymentNumber: number;
+  paymentAmount: number;
+  principalPaid: number;
+  interestPaid: number;
+  remainingBalance: number;
+  cumulativePrincipal: number;
+  cumulativeInterest: number;
+}
+
+export interface LoanResult {
+  loanAmount: number;
+  regularPayment: number;
+  paymentFrequency: PaymentFrequency;
+  paymentsPerYear: number;
+  numberOfPayments: number;
+  totalPayments: number;
+  totalInterest: number;
+  annualInterestRate: number;
+  loanTermYears: number;
+  timeline: LoanTimelinePoint[];
+}

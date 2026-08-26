@@ -105,6 +105,7 @@ describe("No broken internal links in current route set", () => {
     "/guides",
     "/calculators/compound-interest",
     "/calculators/mortgage",
+    "/calculators/loan",
   ];
 
   it("all calculator slugs generate valid routes", () => {
