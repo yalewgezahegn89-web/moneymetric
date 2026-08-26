@@ -1,9 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, lazy, Suspense } from "react";
 import { calculateMortgage, validateMortgageInput } from "@/calculators/engine/mortgage";
 import type { MortgageInput, MortgageResult, MortgageValidationError } from "@/calculators/engine/types";
 import { formatCurrency } from "@/lib/formatting";
+import { useCurrencyInput } from "@/hooks/useCurrencyInput";
+
+const AmortizationChart = lazy(() =>
+  import("./AmortizationChart").then((mod) => ({ default: mod.AmortizationChart }))
+);
 
 const DEFAULTS: MortgageInput = {
   homePrice: 400000,
@@ -23,9 +28,25 @@ export function MortgageCalculator() {
   const [inputs, setInputs] = useState<MortgageInput>(DEFAULTS);
   const [result, setResult] = useState<MortgageResult | null>(null);
   const [errors, setErrors] = useState<MortgageValidationError[]>([]);
+  
+  const homePriceInput = useCurrencyInput(DEFAULTS.homePrice);
+  const downPaymentInput = useCurrencyInput(DEFAULTS.downPayment);
 
   function getFieldError(field: string): string | undefined {
     return errors.find((e) => e.field === field)?.message;
+  }
+
+  function handleCurrencyChange(
+    field: "homePrice" | "downPayment",
+    displayValue: string
+  ) {
+    const input = field === "homePrice" ? homePriceInput : downPaymentInput;
+    input.handleChange(displayValue);
+    setInputs((prev) => ({
+      ...prev,
+      [field]: input.numericValue,
+    }));
+    setErrors((prev) => prev.filter((e) => e.field !== field));
   }
 
   function handleNumericChange(
@@ -68,6 +89,8 @@ export function MortgageCalculator() {
 
   function handleReset() {
     setInputs(DEFAULTS);
+    homePriceInput.reset(DEFAULTS.homePrice);
+    downPaymentInput.reset(DEFAULTS.downPayment);
     setResult(null);
     setErrors([]);
   }
@@ -76,7 +99,7 @@ export function MortgageCalculator() {
 
   return (
     <div className="grid gap-8 lg:grid-cols-2">
-      <form onSubmit={handleSubmit} noValidate className="space-y-6">
+      <form onSubmit={handleSubmit} noValidate className="space-y-4">
         <div>
           <label htmlFor="homePrice" className="block text-sm font-medium text-gray-700">
             Home Price
@@ -85,12 +108,13 @@ export function MortgageCalculator() {
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
             <input
               id="homePrice"
-              type="number"
-              value={Number.isNaN(inputs.homePrice) ? "" : inputs.homePrice}
-              onChange={(e) => handleNumericChange("homePrice", e.target.value)}
+              type="text"
+              inputMode="numeric"
+              value={homePriceInput.displayValue}
+              onChange={(e) => handleCurrencyChange("homePrice", e.target.value)}
               min={0}
               step={1000}
-              placeholder="400000"
+              placeholder="400,000"
               className={`block w-full rounded-lg border py-2.5 pl-7 pr-4 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 ${
                 getFieldError("homePrice")
                   ? "border-red-500 focus:ring-red-500 focus:border-red-500"
@@ -115,12 +139,13 @@ export function MortgageCalculator() {
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
             <input
               id="downPayment"
-              type="number"
-              value={Number.isNaN(inputs.downPayment) ? "" : inputs.downPayment}
-              onChange={(e) => handleNumericChange("downPayment", e.target.value)}
+              type="text"
+              inputMode="numeric"
+              value={downPaymentInput.displayValue}
+              onChange={(e) => handleCurrencyChange("downPayment", e.target.value)}
               min={0}
               step={1000}
-              placeholder="80000"
+              placeholder="80,000"
               className={`block w-full rounded-lg border py-2.5 pl-7 pr-4 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 ${
                 getFieldError("downPayment")
                   ? "border-red-500 focus:ring-red-500 focus:border-red-500"
@@ -252,31 +277,37 @@ function ResultCard({ result, periodLabel }: { result: MortgageResult; periodLab
         <span className="text-lg font-medium text-gray-500"> / {periodLabel}</span>
       </p>
 
-      <div className="mt-8 grid grid-cols-2 gap-x-6 gap-y-5">
-        <div>
+      <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 sm:gap-y-5">
+        <div className="rounded-lg bg-gray-50 p-4">
           <p className="text-xs font-medium uppercase tracking-wide text-gray-400">Loan Amount</p>
           <p className="mt-1 text-lg font-semibold text-gray-900">
             {formatCurrency(result.loanAmount)}
           </p>
         </div>
-        <div>
+        <div className="rounded-lg bg-gray-50 p-4">
           <p className="text-xs font-medium uppercase tracking-wide text-gray-400">Total Payments</p>
           <p className="mt-1 text-lg font-semibold text-gray-900">
             {formatCurrency(result.totalPayments)}
           </p>
         </div>
-        <div>
+        <div className="rounded-lg bg-gray-50 p-4">
           <p className="text-xs font-medium uppercase tracking-wide text-gray-400">Total Interest</p>
           <p className="mt-1 text-lg font-semibold text-gray-900">
             {formatCurrency(result.totalInterest)}
           </p>
         </div>
-        <div>
+        <div className="rounded-lg bg-gray-50 p-4">
           <p className="text-xs font-medium uppercase tracking-wide text-gray-400">Number of Payments</p>
           <p className="mt-1 text-lg font-semibold text-gray-900">
             {result.numberOfPayments.toLocaleString()}
           </p>
         </div>
+      </div>
+
+      <div className="mt-6 border-t border-gray-100 pt-4">
+        <Suspense fallback={<div className="h-72 sm:h-80 animate-pulse rounded-lg bg-gray-100" />}>
+          <AmortizationChart result={result} />
+        </Suspense>
       </div>
 
       <div className="mt-6 border-t border-gray-100 pt-4">
