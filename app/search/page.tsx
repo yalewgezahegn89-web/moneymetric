@@ -4,7 +4,8 @@ import { generatePageMetadata } from "@/lib/seo";
 export const metadata = generatePageMetadata(
   "Search",
   "Search MoneyMetric calculators and guides.",
-  "/search"
+  "/search",
+  { noindex: true }
 );
 
 export default function SearchPage() {

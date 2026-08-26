@@ -2,10 +2,12 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getCalculatorBySlug } from "@/calculators/registry";
-import { generateCalculatorMetadata } from "@/lib/seo";
+import { getCalculatorSeoContent } from "@/content/registry";
+import { generateCalculatorMetadata, generateBreadcrumbSchema } from "@/lib/seo";
 import { Container } from "@/components/ui/Container";
 import { CompoundInterestCalculator } from "@/components/calculators/CompoundInterestCalculator";
 import { MortgageCalculator } from "@/components/calculators/MortgageCalculator";
+import { CalculatorSeoSections } from "@/components/calculators/CalculatorSeoContent";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -32,9 +34,22 @@ export default async function CalculatorPage({ params }: PageProps) {
   }
 
   const CalculatorComponent = CALCULATOR_COMPONENTS[slug];
+  const seoContent = getCalculatorSeoContent(slug);
+
+  const breadcrumbItems = [
+    { name: "Home", path: "/" },
+    { name: "Calculators", path: "/calculators" },
+    { name: calculator.meta.title, path: `/calculators/${slug}` },
+  ];
+
+  const breadcrumbSchema = generateBreadcrumbSchema(breadcrumbItems);
 
   return (
     <section className="py-12 sm:py-16">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       <Container>
         <nav className="mb-6 text-xs text-gray-400" aria-label="Breadcrumb">
           <ol className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
@@ -57,7 +72,7 @@ export default async function CalculatorPage({ params }: PageProps) {
             {calculator.meta.title}
           </h1>
           <p className="mt-4 text-lg text-gray-600">
-            {calculator.meta.description}
+            {seoContent?.intro ?? calculator.meta.description}
           </p>
 
           <div className="mt-10">
@@ -69,6 +84,8 @@ export default async function CalculatorPage({ params }: PageProps) {
               </div>
             )}
           </div>
+
+          {seoContent && <CalculatorSeoSections content={seoContent} />}
         </div>
       </Container>
     </section>
