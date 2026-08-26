@@ -103,6 +103,12 @@ describe("No broken internal links in current route set", () => {
     "/calculators",
     "/categories",
     "/guides",
+    "/about",
+    "/contact",
+    "/privacy",
+    "/terms",
+    "/disclaimer",
+    "/methodology",
     "/calculators/compound-interest",
     "/calculators/mortgage",
     "/calculators/loan",
@@ -140,6 +146,13 @@ describe("No broken internal links in current route set", () => {
       for (const relatedSlug of content.relatedCalculatorSlugs) {
         expect(validRoutes).toContain(`/calculators/${relatedSlug}`);
       }
+    }
+  });
+
+  it("all trust/legal pages are in valid routes", () => {
+    const trustPages = ["/about", "/contact", "/privacy", "/terms", "/disclaimer", "/methodology"];
+    for (const page of trustPages) {
+      expect(validRoutes).toContain(page);
     }
   });
 });
@@ -288,5 +301,19 @@ describe("Important calculator pages are reachable through internal navigation",
 
   it("calculators page would show all calculators (registry not empty)", () => {
     expect(calculatorRegistry.length).toBeGreaterThan(0);
+  });
+});
+
+describe("Trust and legal pages exist", () => {
+  it("sitemap includes trust/legal pages", async () => {
+    const sitemap = (await import("@/app/sitemap")).default;
+    const entries = sitemap();
+    const urls = entries.map((entry) => entry.url);
+
+    expect(urls.some((url) => url.includes("/about"))).toBe(true);
+    expect(urls.some((url) => url.includes("/privacy"))).toBe(true);
+    expect(urls.some((url) => url.includes("/terms"))).toBe(true);
+    expect(urls.some((url) => url.includes("/disclaimer"))).toBe(true);
+    expect(urls.some((url) => url.includes("/methodology"))).toBe(true);
   });
 });

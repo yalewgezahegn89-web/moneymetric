@@ -9,9 +9,24 @@ export const mainNavigation: NavItem[] = [
   { label: "Guides", href: "/guides" },
 ];
 
-export const footerNavigation: { resources: NavItem[] } = {
+export const footerNavigation: {
+  resources: NavItem[];
+  company: NavItem[];
+  legal: NavItem[];
+} = {
   resources: [
     { label: "Guides", href: "/guides" },
     { label: "Categories", href: "/categories" },
+    { label: "Calculators", href: "/calculators" },
+  ],
+  company: [
+    { label: "About", href: "/about" },
+    { label: "Contact", href: "/contact" },
+    { label: "Methodology", href: "/methodology" },
+  ],
+  legal: [
+    { label: "Privacy", href: "/privacy" },
+    { label: "Terms", href: "/terms" },
+    { label: "Disclaimer", href: "/disclaimer" },
   ],
 };
